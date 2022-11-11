@@ -14,3 +14,78 @@ I am interested in exploring data related to race and Latinidad. I would like to
 
 ## Milestone 2
 How have total incomes among members of different racial groups trended between the years 1970 and 2020? In this study, I will compare the growth of the average total incomes of five racial groups over a span of 50 years. I hypothesize that the US Census Bureau Data will reveal that generally, white and Asian US citizens have had steeper increases in income than Black and Hispanic communities. This argument is predicated on the presence of institutional racism in the United States. Likewise, the data will likely reflect the increasing racial wage gap that disproportionately affects Black and Hispanic Americans. The explanatory variables that I will look into are the different racial categorie. These would be the racial categories of “Black,” “White (Non-Hispanic),” “Asian,” Hispanic (All Races),” “Pacific Islander,” and “Other.” The outcome variable will be the total average income for the racial group. This will be measured in dollars over the 50 years between 1970 and 2020, spaced by one year increments. From here, I will look at the linear regression of the data over the years and see which racial groups have had the most dramatic/steepest growth. If the white and Asian American average total incomes tend to have steeper slopes than those for Black and Hispanic Americans, this will support my hypothesis that specifically disadvantaged groups, more specifically Hispanic and Black Americans, saw less dramatic total income growth in the last 50 years than white and Asian Americans. My hypothesis would be disproved if there were more dramatic growth within the Black and Hispanic demographic than the white and Asian. Furthermore, if there is a net decrease in income for any racial demographic over those 50 years, then that will further disprove my hypothesis. 
+
+
+## Milestone 3
+
+
+```{r}
+
+library(tidyverse)
+library(tidycensus)
+library(sf)
+
+census_api_key('5e4ef03bc94c689219c200d6b833aa56803bb648')
+```
+
+```{r}
+options(tigris_use_cache = TRUE)
+
+ca_income <- get_acs(
+  geography = "county", 
+  variables = "B19013_001",
+  state = "CA", 
+  year = 2020,
+  geometry = TRUE
+)
+
+ca_income
+
+```
+```{r}
+v17 <- load_variables(2017, "acs5", cache = TRUE)
+v17 |>
+  filter(grepl("income", label))
+```
+
+
+```{r}
+plot(ca_income["estimate"])
+```
+
+
+```{r}
+san_mateo_race <- get_decennial(
+  geography = "county", 
+  state = "CA", 
+  variables = c(
+    Hispanic = "P2_002N",
+    White = "P2_005N",
+    Black = "P2_006N",
+    Native = "P2_007N",
+    Asian = "P2_008N"
+  ),
+  summary_var = "P2_001N",
+  year = 2020,
+  geometry = TRUE
+) %>%
+  mutate(percent = 100 * (value / summary_value))
+
+
+san_mateo_race
+```
+
+
+```{r}
+san_mateo_race %>%
+  ggplot() +  
+  geom_sf(aes(fill= percent)) +  
+  scale_fill_viridis_c(option = "H") +  
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  facet_wrap(~variable, ncol = 2)
+```
