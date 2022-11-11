@@ -18,6 +18,9 @@ How have total incomes among members of different racial groups trended between 
 
 ## Milestone 3
 
+I have generated two plots with the information of the 2020 Census. The first plot shows a singular map of California, indicating each county's average level of income. My second plot shows five individual maps of California corresponding to a each of five racial group. The plots show the demographic percentages of each racial group residing in each of California's counties. 
+
+My intention with this data is to compare each individual race plot with the income plot and recognize if there are any correlations between proportional racial identity and income level. These will be the two variables that I will be observing, how racial identity correlates with a county's average income level.
 
 ```{r}
 
@@ -50,7 +53,7 @@ v17 |>
 
 
 ```{r}
-plot(ca_income["estimate"])
+plot(ca_income["estimate"], main = "Average Income by County")
 ```
 
 
