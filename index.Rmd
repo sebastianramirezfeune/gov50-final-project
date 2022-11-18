@@ -92,3 +92,75 @@ san_mateo_race %>%
         axis.ticks.y=element_blank()) +
   facet_wrap(~variable, ncol = 2)
 ```
+
+```{r}
+options(tigris_use_cache = TRUE)
+
+ca_income <- get_acs(
+  geography = "tract", 
+  variables = "B19013_001",
+  state = "CA", 
+  year = 2020,
+  geometry = TRUE
+)
+
+ca_income
+
+california_race <- get_decennial(
+  geography = "tract", 
+  state = "CA", 
+  variables = c(
+    Hispanic = "P2_002N",
+    White = "P2_005N",
+    Black = "P2_006N",
+    Native = "P2_007N",
+    Asian = "P2_008N",
+    Total = "P2_001N"
+  ),
+  year = 2020,
+  geometry = TRUE
+)
+
+california_race
+```
+
+
+
+
+```{r}
+cali_merge <- merge(x = as.data.frame(california_race), y = as.data.frame(ca_income), by.x = "GEOID", by.y = "GEOID")
+cali_merge <- cali_merge |>
+  pivot_wider(
+    names_from = variable.x, 
+    values_from = value
+  ) |>
+  mutate(percentage_white = (White/Total)*100, percentage_black = (Black/Total)*100, percentage_hispanic = (Hispanic/Total)*100, percentage_asian = (Asian/Total)*100, percentage_native = (Native/Total)*100)
+cali_merge
+```
+
+
+
+```{r}
+m.lm <- lm(estimate ~  percentage_white + percentage_hispanic + percentage_black + percentage_asian, data = cali_merge)
+summary(m.lm)
+m.lm
+
+```
+
+This linear regression model indicates that 
+
+
+```{r}
+cali_plot <- ggplot(cali_merge, aes(estimate)) + 
+  geom_smooth(aes(y =percentage_white ), color = "orange") + 
+  geom_smooth(aes(y = percentage_black), color = "black") + 
+  geom_smooth(aes(y =percentage_asian ), color = "turquoise") + 
+  geom_smooth(aes(y = percentage_native), color = "blue")+
+ geom_smooth(aes(y =percentage_hispanic ), color = "red") +
+   labs(x = "Income", y = "Percentage of Each Race", title = "Average Income per Population Percentage Based on Race") + 
+  guides(fill = guide_legend(title = "Title"))
+cali_plot
+```
+
+
+This graph 
