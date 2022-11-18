@@ -152,15 +152,18 @@ This linear regression model indicates that
 
 ```{r}
 cali_plot <- ggplot(cali_merge, aes(estimate)) + 
-  geom_smooth(aes(y =percentage_white ), color = "orange") + 
-  geom_smooth(aes(y = percentage_black), color = "black") + 
-  geom_smooth(aes(y =percentage_asian ), color = "turquoise") + 
-  geom_smooth(aes(y = percentage_native), color = "blue")+
- geom_smooth(aes(y =percentage_hispanic ), color = "red") +
+  geom_smooth(aes(y =percentage_white ), color = "orange", fill = "orange") + 
+  geom_smooth(aes(y = percentage_black), color = "purple", fill = "purple") + 
+  geom_smooth(aes(y =percentage_asian ), color = "turquoise", fill = "turquoise") + 
+  geom_smooth(aes(y = percentage_native), color = "blue", fill = "blue")+
+ geom_smooth(aes(y =percentage_hispanic ), color = "red", fill = "red") +
    labs(x = "Income", y = "Percentage of Each Race", title = "Average Income per Population Percentage Based on Race") + 
   guides(fill = guide_legend(title = "Title"))
 cali_plot
 ```
 
 
-This graph 
+This graph illustrates the average income levels for Asian, Black, White, Hispanic, and Native residents of California according to the 2020 Census. The graph shows interesting implications of both economic inequity and racial proportions in the state of California. The graph indicates that both the Indigenous and Black populations are relatively low throughout California, with the Black population never exceeding 20% and the Indigenous population never exceeding 2% in any Census tract. 
+
+The graph indicates that in low income regions where income is less than 100,000 dollars, these areas tend to be predominantly Hispanic American, especially around the 45,000 dollar annual income mark. Asian, Black, and white Americans tend to be the same population proportion at an income of zero, but they begin to diverge from here forward. Consistently, tracts where Asian and white Californians are more of a majority correspond with increasingly higher wages. Hence, the more white and Asian an area is, the more likely those whites and Asians are going to be affluent. On the other hand, in places were Black and Hispanic Californians make more money, especially after 150,000 dollars, they are likely to make up a smaller share of the population, at about 5% or less for Black Californians and about 15% or less for Latino Californians.
+
