@@ -52,6 +52,7 @@ v17 |>
 ```
 
 
+
 ```{r}
 plot(ca_income["estimate"], main = "Average Income by County")
 ```
@@ -98,7 +99,8 @@ options(tigris_use_cache = TRUE)
 
 ca_income <- get_acs(
   geography = "tract", 
-  variables = "B19013_001",
+  variables = c( income = "B19013_001",
+  bachelor = "B06009_005"),
   state = "CA", 
   year = 2020,
   geometry = TRUE
@@ -126,7 +128,6 @@ california_race
 
 
 
-
 ```{r}
 cali_merge <- merge(x = as.data.frame(california_race), y = as.data.frame(ca_income), by.x = "GEOID", by.y = "GEOID")
 cali_merge <- cali_merge |>
@@ -139,12 +140,13 @@ cali_merge
 ```
 
 ## Milestone 4
-
-```{r}
+```{r, results = 'asis', echo = TRUE, eval=TRUE, warning = FALSE, message = FALSE}
+##library(stargazer)
 m.lm <- lm(estimate ~  percentage_white + percentage_hispanic + percentage_black + percentage_asian, data = cali_merge)
-summary(m.lm)
-m.lm
 
+##stargazer(m.lm, type = "html")
+library(modelsummary)
+modelsummary(m.lm)
 ```
 
 
@@ -152,11 +154,11 @@ m.lm
 
 ```{r}
 cali_plot <- ggplot(cali_merge, aes(estimate)) + 
-  geom_smooth(aes(y =percentage_white ), color = "orange", fill = "orange") + 
-  geom_smooth(aes(y = percentage_black), color = "purple", fill = "purple") + 
-  geom_smooth(aes(y =percentage_asian ), color = "turquoise", fill = "turquoise") + 
-  geom_smooth(aes(y = percentage_native), color = "blue", fill = "blue")+
- geom_smooth(aes(y =percentage_hispanic ), color = "red", fill = "red") +
+  geom_smooth(method = "loess", aes(y =percentage_white ), color = "orange", fill = "orange") + 
+  geom_smooth(method = "loess",aes(y = percentage_black), color = "purple", fill = "purple") + 
+  geom_smooth(method = "loess",aes(y =percentage_asian ), color = "turquoise", fill = "turquoise") + 
+  geom_smooth(method = "loess",aes(y = percentage_native), color = "blue", fill = "blue")+
+ geom_smooth(method = "loess",aes(y =percentage_hispanic ), color = "red", fill = "red") +
    labs(x = "Income", y = "Percentage of Each Race (Tract)", title = "Average Income per Population Percentage Based on Race", caption = "orange = white, purple = Black, turquoise = Asian, blue = Native, red = Hispanic") 
 cali_plot
 ```
