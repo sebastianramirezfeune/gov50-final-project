@@ -1,98 +1,40 @@
 ---
 title: "Gov 50 Final Project"
 author: "Sebastian Ramirez Feune"
-description: "My final project"
+description: "Final project"
 output:
   distill::distill_article:
     self_contained: false
 ---
 
-
-## Project thoughts
-
-I am interested in exploring data related to race and Latinidad. I would like to find data on who identified as "Latino/Hispanic" in the most recent census in major cities across the USA. With this data, I would like to observe the racial proportions of those identifying as Latino or Hispanic: whether they identify as Black, White, Indigenous, Asian, Pacific Islander, or Other. Additionally, I would also like for my data to include their income levels. This way, I will be able to track the general regional trends of how Latinos across the USA racially identify, comparing Latinos in New York City to those in Los Angeles, and so on. My end goal is to see if there are any regional concentrations in the United States where Latinos identify as a certain race more than other regions, and if there is any link between the self-identified race and income level of those respondents. 
-
-## Milestone 2
-How have total incomes among members of different racial groups trended between the years 1970 and 2020? In this study, I will compare the growth of the average total incomes of five racial groups over a span of 50 years. I hypothesize that the US Census Bureau Data will reveal that generally, white and Asian US citizens have had steeper increases in income than Black and Hispanic communities. This argument is predicated on the presence of institutional racism in the United States. Likewise, the data will likely reflect the increasing racial wage gap that disproportionately affects Black and Hispanic Americans. The explanatory variables that I will look into are the different racial categorie. These would be the racial categories of “Black,” “White (Non-Hispanic),” “Asian,” Hispanic (All Races),” “Pacific Islander,” and “Other.” The outcome variable will be the total average income for the racial group. This will be measured in dollars over the 50 years between 1970 and 2020, spaced by one year increments. From here, I will look at the linear regression of the data over the years and see which racial groups have had the most dramatic/steepest growth. If the white and Asian American average total incomes tend to have steeper slopes than those for Black and Hispanic Americans, this will support my hypothesis that specifically disadvantaged groups, more specifically Hispanic and Black Americans, saw less dramatic total income growth in the last 50 years than white and Asian Americans. My hypothesis would be disproved if there were more dramatic growth within the Black and Hispanic demographic than the white and Asian. Furthermore, if there is a net decrease in income for any racial demographic over those 50 years, then that will further disprove my hypothesis. 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 
-## Milestone 3
 
-I have generated two plots with the information of the 2020 Census. The first plot shows a singular map of California, indicating each county's average level of income. My second plot shows five individual maps of California corresponding to a each of five racial group. The plots show the demographic percentages of each racial group residing in each of California's counties. 
+## Introduction
 
-My intention with this data is to compare each individual race plot with the income plot and recognize if there are any correlations between proportional racial identity and income level. These will be the two variables that I will be observing, how racial identity correlates with a county's average income level.
+Despite its diverse population, California continues to be a center for significant social and economic inequality. Why is this so? It is common to look back to a history of oppression and discrimination that created institutions that continue to play integral roles in American society. This study aims to closely examine the relationship between race and income. How is income level generally related to race? And, what are some factors that may be impacting these income disparities? Thus, in addition to observing how income generally correlates with race, I will be simultaneously tracking how race is correlated with education level and unemployment. 
+
+I contend that there were will be strong correlations made between income and racial identity in California, much like the rest of the United States. Black, Native American, and Hispanic/Latino communities will likely be in the lower ranks of income level, along with education and employment levels. This is largely due to historic discrimination of these two communities resulting in institutional biases and racism barring these demographics from many resources available to their Asian and white counterparts. While Asian Americans are people of color and recipients of institutionalized racism, their designation as “model minorities” and general arrival to the United States with high levels of education has aided in their ascension into higher income brackets. This is generally interesting because it gives concrete evidence and examples as to how the overall lack of access to resources has a strong link with the income inequality that we see in our nation.
+
+
+## Data 
+
+In this cross-sectional study, I used four variables: race, income, education, and unemployment. All of the data used in the analysis comes from the American Community Survey (ACS) of the 2020 Census. The state that we will be specifically observing is California. The key independent variable is race: Black, white, Hispanic, Asian, and Native American. Using these variables, we are able to measure the dependent variables, which include income, education, and unemployment. 
 
 ```{r}
 
 library(tidyverse)
 library(tidycensus)
 library(sf)
+library(ggplot2)
 
 census_api_key('5e4ef03bc94c689219c200d6b833aa56803bb648')
 ```
 
-```{r}
-options(tigris_use_cache = TRUE)
 
-ca_income <- get_acs(
-  geography = "county", 
-  variables = "B19013_001",
-  state = "CA", 
-  year = 2020,
-  geometry = TRUE
-)
-
-ca_income
-
-```
-```{r}
-v17 <- load_variables(2017, "acs5", cache = TRUE)
-v17 |>
-  filter(grepl("income", label))
-```
-
-
-
-```{r}
-plot(ca_income["estimate"], main = "Average Income by County")
-```
-
-
-```{r}
-san_mateo_race <- get_decennial(
-  geography = "county", 
-  state = "CA", 
-  variables = c(
-    Hispanic = "P2_002N",
-    White = "P2_005N",
-    Black = "P2_006N",
-    Native = "P2_007N",
-    Asian = "P2_008N"
-  ),
-  summary_var = "P2_001N",
-  year = 2020,
-  geometry = TRUE
-) %>%
-  mutate(percent = 100 * (value / summary_value))
-
-
-san_mateo_race
-```
-
-
-```{r}
-san_mateo_race %>%
-  ggplot() +  
-  geom_sf(aes(fill= percent)) +  
-  scale_fill_viridis_c(option = "H") +  
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(), 
-        axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  facet_wrap(~variable, ncol = 2)
-```
 
 ```{r}
 options(tigris_use_cache = TRUE)
@@ -100,12 +42,12 @@ options(tigris_use_cache = TRUE)
 ca_income <- get_acs(
   geography = "tract", 
   variables = c( income = "B19013_001",
-  bachelor = "B06009_005"),
+  bachelor = "B06009_005", 
+  unemployment = "B23025_005"),
   state = "CA", 
   year = 2020,
   geometry = TRUE
 )
-
 ca_income
 
 california_race <- get_decennial(
@@ -122,49 +64,139 @@ california_race <- get_decennial(
   year = 2020,
   geometry = TRUE
 )
-
 california_race
 ```
 
+```{r}
+options(tigris_use_cache = TRUE)
 
+ca_income1 <- get_acs(
+  geography = "county", 
+  variables = "B19013_001",
+  state = "CA", 
+  year = 2020,
+  geometry = TRUE
+)
+
+ca_income1
+
+```
 
 ```{r}
-cali_merge <- merge(x = as.data.frame(california_race), y = as.data.frame(ca_income), by.x = "GEOID", by.y = "GEOID")
-cali_merge <- cali_merge |>
+ca_income <- ca_income |>
+  select(-moe) |>
   pivot_wider(
-    names_from = variable.x, 
-    values_from = value
-  ) |>
-  mutate(percentage_white = (White/Total)*100, percentage_black = (Black/Total)*100, percentage_hispanic = (Hispanic/Total)*100, percentage_asian = (Asian/Total)*100, percentage_native = (Native/Total)*100)
+    names_from = "variable", 
+    values_from = "estimate"
+  )
+california_race <- california_race |>
+  pivot_wider(
+    names_from = "variable", 
+    values_from = "value")
+
+cali_merge <- merge(x = as.data.frame(california_race), y = as.data.frame(ca_income), by.x = "GEOID", by.y = "GEOID")
+
+cali_merge <- cali_merge |>
+  mutate(percentage_white = (White/Total)*100, percentage_black = (Black/Total)*100, percentage_hispanic = (Hispanic/Total)*100, percentage_asian = (Asian/Total)*100, percentage_native = (Native/Total)*100, percentage_unemployed = (unemployment/Total)*100, percentage_bachelor = (bachelor/Total)*100)
 cali_merge
 ```
 
-## Milestone 4
-```{r, results = 'asis', echo = TRUE, eval=TRUE, warning = FALSE, message = FALSE}
-##library(stargazer)
-m.lm <- lm(estimate ~  percentage_white + percentage_hispanic + percentage_black + percentage_asian, data = cali_merge)
+```{r}
+plot(ca_income["income"], main = "Average Income by Tract")
 
-##stargazer(m.lm, type = "html")
-library(modelsummary)
-modelsummary(m.lm)
+plot(ca_income1["estimate"], main = "Average Income by County")
+```
+```{r}
+cali_race <- get_decennial(
+  geography = "county", 
+  state = "CA", 
+  variables = c(
+    Hispanic = "P2_002N",
+    White = "P2_005N",
+    Black = "P2_006N",
+    Native = "P2_007N",
+    Asian = "P2_008N"
+  ),
+  summary_var = "P2_001N",
+  year = 2020,
+  geometry = TRUE
+) %>%
+  mutate(percent = 100 * (value / summary_value))
+
+
+cali_race
+```
+
+```{r}
+cali_race |>
+  ggplot() +  
+  geom_sf(aes(fill= percent)) +  
+  scale_fill_viridis_c(option = "H") +  
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  facet_wrap(~variable, ncol = 2)
 ```
 
 
+Above are two visuals of the primary dependent and independent variables: race and income. They are displayed in maps, showing the average racial makeup of each California county as well as the average income of each California county, with high income levels averaging in the San Francisco Bay Area, which has strong white, Hispanic, and Asian populations.
+
+## Results
+
+```{r, results = 'asis', echo = TRUE, eval=TRUE, warning = FALSE, message = FALSE}
+##library(stargazer)
+
+m.lm_black <-  lm(income ~  percentage_black + percentage_bachelor +  percentage_unemployed, data = cali_merge)
+
+m.lm_white <- lm(income ~ percentage_bachelor +  percentage_unemployed + percentage_white, data = cali_merge)
+
+m.lm_hisp <-  lm(income ~  percentage_hispanic + percentage_bachelor +  percentage_unemployed, data = cali_merge)
+
+m.lm_asian <-  lm(income ~  percentage_asian + percentage_bachelor +  percentage_unemployed, data = cali_merge)
+
+m.lm_native <-  lm(income ~  percentage_native + percentage_bachelor +  percentage_unemployed, data = cali_merge)
+
+##stargazer(m.lm, type = "html")
+library(modelsummary)
+cm <- c("percentage_bachelor" = "Percentage Bachelor's", "percentage_unemployed" = "Percentage Unemployed", "percentage_black" = "Percentage Black", "percentage_white" = "Percentage White", "percentage_hispanic" = "Percentage Hispanic", "percentage_asian" = "Percentage Asian", "percentage_native" = "Percentage Native")
+modelsummary(list("Tract Income 1" = m.lm_black, "Tract Income 2" =  m.lm_white, "Tract Income 3" =  m.lm_hisp, "Tract Income 4" =  m.lm_asian, "Income 5" =  m.lm_native), coef_map = cm, stars = TRUE)
+```
+
+This table illustrates the regressions of multiple variables in relation to income. All of the regression show strong correlations and significance, as indicated by the three asterisks adjacent to every value. This indicates that there is likely a causal link between the values. When it comes to income, the linear regressions reveal that with a single percentage increase of an Asian or white person in a tract will increase the average Asian and white incomes, respectively, more than those of the Black, Hispanic, and Native populations. Meanwhile, the average income of Hispanic, Black, and Native American (in order of increasing income loss) decreases with each additional single percentage increase in their respective populations.
+
+More specifically, for every single percentage increase in the white population, the income of the white population increases by \$675.437. For every single percentage increase in the Black population, the income of the Black population decreases by \$1242.166 For every single percentage increase in the Hispanic population, the income of the Hispanic population decreases by \$887.981. For every single percentage increase in the Asian population, the income of the Asian population increases by \$917.810. For every single percentage decrease in the Native population, the income of the Native population increases by \$3196.215. Then, when looking at Bachelor's Degrees, the table shows that for every single percent increase in the portion of residents holding a Bachelor's in the Census tract increases tract income by 273.868. Meanwhile, increasing the unemployment rate by 1% decreases average income by \$81.783.
 
 
 ```{r}
-cali_plot <- ggplot(cali_merge, aes(estimate)) + 
-  geom_smooth(method = "loess", aes(y =percentage_white ), color = "orange", fill = "orange") + 
-  geom_smooth(method = "loess",aes(y = percentage_black), color = "purple", fill = "purple") + 
-  geom_smooth(method = "loess",aes(y =percentage_asian ), color = "turquoise", fill = "turquoise") + 
-  geom_smooth(method = "loess",aes(y = percentage_native), color = "blue", fill = "blue")+
- geom_smooth(method = "loess",aes(y =percentage_hispanic ), color = "red", fill = "red") +
-   labs(x = "Income", y = "Percentage of Each Race (Tract)", title = "Average Income per Population Percentage Based on Race", caption = "orange = white, purple = Black, turquoise = Asian, blue = Native, red = Hispanic") 
-cali_plot
+cali_plot <- ggplot(cali_merge, aes(y = Total)) + 
+  geom_smooth(method = "lm", aes(x = percentage_white ), color = "orange", fill = "orange", alpha = 0.25) + 
+  geom_smooth(method = "lm",aes(x = percentage_black), color = "purple", fill = "purple", alpha = 0.25) + 
+  geom_smooth(method = "lm",aes(x =percentage_asian ), color = "turquoise", fill = "turquoise", alpha = 0.25) + 
+  geom_smooth(method = "lm",aes(x = percentage_native), color = "blue", fill = "blue", alpha = 0.25)+
+ geom_smooth(method = "lm",aes(x =percentage_hispanic ), color = "red", fill = "red", alpha = 0.25) +
+   labs(x = "Percentage of Each Race (Tract)", y = "Income", title = "Average Income per Population Percentage Based on Race", caption = "Orange = white | Purple = Black | Turquoise = Asian | Blue = Native | Red = Hispanic") 
+cali_plot 
 ```
 
 
 This graph illustrates the average income levels for Asian, Black, White, Hispanic, and Native residents of California according to the 2020 Census. The graph shows interesting implications of both economic inequity and racial composition in the state of California. The graph indicates that both the Indigenous and Black populations are relatively low throughout California, with the Black population never exceeding 20% and the Indigenous population never exceeding 2% in any Census tract. 
 
 The graph indicates that in low income regions where income is less than \$100,000 dollars, these areas tend to be predominantly Hispanic American, especially around the \$45,000 annual income mark. Asian, Black, and white Americans tend to be the same population proportion at an income of zero, but they begin to diverge from here forward. Consistently, tracts where Asian and white Californians are more of a majority correspond with increasingly higher wages. Hence, the more white and Asian an area is, the more likely those whites and Asians are going to be affluent. On the other hand, in places were Black and Hispanic Californians make more money, especially after \$150,000, they are likely to make up a smaller share of the population, at about 5% or less for Black Californians and about 15% or less for Latino Californians.
+
+
+## Conclusion
+
+Our analysis has shown that race and income in California are both strongly correlated. When there is an increase in the population of Black, Hispanic, or Indigenous people in a Census tract, the average income level of the tract is expected to drop. Meanwhile, an increase in Asian and white Californians increase the average income. Race and income are inextricably tied, and they reflect a much broader American issue of racial discrimination. 
+
+While observing these results, I understood the importance of measuring other predictor variables, such as education level and unemployment levels of a certain tract. The positive correlation between income and attainment of a Bachelor's degree indicates how education level is a potential factor that may largely influence the dichotomies in income that the various racial groups face. With unemployment levels holding a negative relationship with income, it is clear that higher levels of unemployment in certain communities may effect significant income losses.
+
+Examining these separate variables is essential because there is no inherent reason for which certain demographics trend towards lower affluence in a state like California. In addition to be racial/ethnic minorities, there are also institutional obstacles that many families of color face. Asian American families hold a peculiar spot within this demographic, for they do face institutional racism, but in a different manner, with many white Americans using Asian Americans as "model minorities." 
+
+My intention with creating an appendix was to dive deeper into the relationship between race and both education and unemployment. While my main analysis observes income as the outcome variable, this appendixed analysis uses both education and unemployment as outcome variables. 
+
+
+
 
