@@ -1,0 +1,181 @@
+---
+title: "Practice"
+author: "Sebastian Ramirez Feune"
+date: "2022-11-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library(tidyverse)
+library(tidycensus)
+library(dplyr)
+library(sf)
+
+census_api_key('5e4ef03bc94c689219c200d6b833aa56803bb648')
+```
+
+```{r}
+options(tigris_use_cache = TRUE)
+
+ca_income <- get_acs(
+  geography = "county", 
+  variables = "B19013_001",
+  state = "CA", 
+  year = 2020,
+  geometry = TRUE
+)
+
+ca_income
+
+```
+```{r}
+v17 <- load_variables(2017, "acs5", cache = TRUE)
+v17 |>
+  filter(grepl("income", label))
+```
+
+
+```{r}
+plot(ca_income["estimate"])
+```
+
+
+```{r}
+san_mateo_race <- get_decennial(
+  geography = "county", 
+  state = "CA", 
+  variables = c(
+    Hispanic = "P2_002N",
+    White = "P2_005N",
+    Black = "P2_006N",
+    Native = "P2_007N",
+    Asian = "P2_008N"
+  ),
+  summary_var = "P2_001N",
+  year = 2020,
+  geometry = TRUE
+) %>%
+  mutate(percent = 100 * (value / summary_value))
+
+
+san_mateo_race
+```
+
+
+```{r}
+san_mateo_race %>%
+  ggplot() +  
+  geom_sf(aes(fill= percent)) +  
+  scale_fill_viridis_c(option = "H") +  
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  facet_wrap(~variable, ncol = 2)
+```
+
+
+
+
+```{r}
+oneida_race <- get_decennial(
+  geography = "tract", 
+  state = "NY",
+  county = "Oneida",
+  variables = c(
+    Hispanic = "P2_002N",
+    White = "P2_005N",
+    Black = "P2_006N",
+    Native = "P2_007N",
+    Asian = "P2_008N"
+  ),
+  summary_var = "P2_001N",
+  year = 2020,
+  geometry = TRUE
+) %>%
+  mutate(percent = 100 * (value / summary_value))
+
+
+oneida_race
+
+oneida_race %>%
+  ggplot() +  
+  geom_sf(aes(fill= percent)) +  
+  scale_fill_viridis_c(option = "H") +  
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  facet_wrap(~variable, ncol = 2)
+
+```
+
+
+```{r}
+options(tigris_use_cache = TRUE)
+
+ca_income <- get_acs(
+  geography = "tract", 
+  variables = "B19013_001",
+  state = "CA", 
+  year = 2020,
+  geometry = TRUE
+)
+
+ca_income
+
+california_race <- get_decennial(
+  geography = "tract", 
+  state = "CA", 
+  variables = c(
+    Hispanic = "P2_002N",
+    White = "P2_005N",
+    Black = "P2_006N",
+    Native = "P2_007N",
+    Asian = "P2_008N",
+    Total = "P2_001N"
+  ),
+  year = 2020,
+  geometry = TRUE
+)
+
+california_race
+```
+
+
+
+```{r}
+cali_merge <- merge(x = as.data.frame(california_race), y = as.data.frame(ca_income), by.x = "GEOID", by.y = "GEOID")
+cali_merge <- cali_merge |>
+  pivot_wider(
+    names_from = variable.x, 
+    values_from = value
+  ) |>
+  mutate(percentage_white = (White/Total)*100, percentage_black = (Black/Total)*100, percentage_hispanic = (Hispanic/Total)*100, percentage_Asian = (Asian/Total)*100, percentage_native = (Native/Total)*100)
+cali_merge
+```
+
+```{r}
+m.lm <- lm(estimate ~  percentage_white + percentage_hispanic + percentage_black, data = cali_merge)
+summary(m.lm)
+m.lm
+
+```
+
+
+
+
+
+
+
+
+
