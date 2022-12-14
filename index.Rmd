@@ -1,16 +1,19 @@
 ---
-title: "Gov 50 Final Project"
+title: "Race and Income in California"
 author: "Sebastian Ramirez Feune"
-description: "Final project"
+description: "An examination of inequality in California"
 output:
   distill::distill_article:
     self_contained: false
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, 
+  message = FALSE, 
+  warning = FALSE, 
+  fig.align = "center"
+)
 ```
-
 
 
 ## Introduction
@@ -22,7 +25,15 @@ I contend that there were will be strong correlations made between income and ra
 
 ## Data 
 
-In this cross-sectional study, I used four variables: race, income, education, and unemployment. All of the data used in the analysis comes from the American Community Survey (ACS) of the 2020 Census. The state that we will be specifically observing is California. The key independent variable is race: Black, white, Hispanic, Asian, and Native American. Using these variables, we are able to measure the dependent variables, which include income, education, and unemployment. 
+In this cross-sectional study, we are using two sources: 
+
+1. The American Community Survey (ACS) of 2020 was used to attain  data on income, education, and unemployment
+
+2. The Decennial Census of 2020 was used to attain data on 
+
+Both sources were merged together into the same data set.
+
+I used four variables: race, income, education, and unemployment. The state that we will be specifically observing is California, narrowing the scope of the study. The key independent variable is race: Black, white, Hispanic, Asian, and Native American. Using these variables, we are able to measure the dependent variables, which include income, education, and unemployment. 
 
 ```{r}
 
@@ -41,14 +52,14 @@ options(tigris_use_cache = TRUE)
 
 ca_income <- get_acs(
   geography = "tract", 
-  variables = c( income = "B19013_001",
+  variables = c(income = "B19013_001",
   bachelor = "B06009_005", 
   unemployment = "B23025_005"),
   state = "CA", 
   year = 2020,
   geometry = TRUE
 )
-ca_income
+
 
 california_race <- get_decennial(
   geography = "tract", 
@@ -64,7 +75,7 @@ california_race <- get_decennial(
   year = 2020,
   geometry = TRUE
 )
-california_race
+
 ```
 
 ```{r}
@@ -78,7 +89,6 @@ ca_income1 <- get_acs(
   geometry = TRUE
 )
 
-ca_income1
 
 ```
 
@@ -98,13 +108,13 @@ cali_merge <- merge(x = as.data.frame(california_race), y = as.data.frame(ca_inc
 
 cali_merge <- cali_merge |>
   mutate(percentage_white = (White/Total)*100, percentage_black = (Black/Total)*100, percentage_hispanic = (Hispanic/Total)*100, percentage_asian = (Asian/Total)*100, percentage_native = (Native/Total)*100, percentage_unemployed = (unemployment/Total)*100, percentage_bachelor = (bachelor/Total)*100)
-cali_merge
+
 ```
 
 ```{r}
-plot(ca_income["income"], main = "Average Income by Tract")
+plot(ca_income["income"], main = "Average Income by California Tract")
 
-plot(ca_income1["estimate"], main = "Average Income by County")
+plot(ca_income1["estimate"], main = "Average Income by California County")
 ```
 ```{r}
 cali_race <- get_decennial(
@@ -124,7 +134,6 @@ cali_race <- get_decennial(
   mutate(percent = 100 * (value / summary_value))
 
 
-cali_race
 ```
 
 ```{r}
@@ -142,11 +151,13 @@ cali_race |>
 ```
 
 
-Above are two visuals of the primary dependent and independent variables: race and income. They are displayed in maps, showing the average racial makeup of each California county as well as the average income of each California county, with high income levels averaging in the San Francisco Bay Area, which has strong white, Hispanic, and Asian populations.
+Above are three visuals of the primary dependent and independent variables: race and income. The first two maps illustrate the distribution of incomes throughout the state of California. While the study observes income distribution based on census tracts, one map shows distribution across counties as a simpler version of the census tract-based model. These models reveal how wealth tends to be concentrated in coastal regions, more specifically the San Francisco Bay Area.
+
+The third map shows California's racial makeup throughout California counties (for simplicity sake). The race map shows the average racial makeup of each California tract/county, with Hispanic Californians spanning across California, especially near the coast, Southern California, and Central Valley. The second most prominent ethnic/racial group is white, with predominantly white tracts concentrating in more Eastern and Northern areas of the state. Asian Americans tend to be found near Los Angeles and the San Francisco Bay Area. Finally, the Black and Native Americans are relatively small throughout the state.
 
 ## Results
 
-```{r, results = 'asis', echo = TRUE, eval=TRUE, warning = FALSE, message = FALSE}
+```{r, results = 'asis', echo = FALSE, eval=TRUE, warning = FALSE, message = FALSE}
 ##library(stargazer)
 
 m.lm_black <-  lm(income ~  percentage_black + percentage_bachelor +  percentage_unemployed, data = cali_merge)
@@ -162,7 +173,7 @@ m.lm_native <-  lm(income ~  percentage_native + percentage_bachelor +  percenta
 ##stargazer(m.lm, type = "html")
 library(modelsummary)
 cm <- c("percentage_bachelor" = "Percentage Bachelor's", "percentage_unemployed" = "Percentage Unemployed", "percentage_black" = "Percentage Black", "percentage_white" = "Percentage White", "percentage_hispanic" = "Percentage Hispanic", "percentage_asian" = "Percentage Asian", "percentage_native" = "Percentage Native")
-modelsummary(list("Tract Income 1" = m.lm_black, "Tract Income 2" =  m.lm_white, "Tract Income 3" =  m.lm_hisp, "Tract Income 4" =  m.lm_asian, "Income 5" =  m.lm_native), coef_map = cm, stars = TRUE)
+modelsummary(list("Tract Income 1" = m.lm_black, "Tract Income 2" =  m.lm_white, "Tract Income 3" =  m.lm_hisp, "Tract Income 4" =  m.lm_asian, "Tract Income 5" =  m.lm_native), coef_map = cm, stars = TRUE)
 ```
 
 This table illustrates the regressions of multiple variables in relation to income. All of the regression show strong correlations and significance, as indicated by the three asterisks adjacent to every value. This indicates that there is likely a causal link between the values. When it comes to income, the linear regressions reveal that with a single percentage increase of an Asian or white person in a tract will increase the average Asian and white incomes, respectively, more than those of the Black, Hispanic, and Native populations. Meanwhile, the average income of Hispanic, Black, and Native American (in order of increasing income loss) decreases with each additional single percentage increase in their respective populations.
@@ -177,7 +188,7 @@ cali_plot <- ggplot(cali_merge, aes(y = Total)) +
   geom_smooth(method = "lm",aes(x =percentage_asian ), color = "turquoise", fill = "turquoise", alpha = 0.25) + 
   geom_smooth(method = "lm",aes(x = percentage_native), color = "blue", fill = "blue", alpha = 0.25)+
  geom_smooth(method = "lm",aes(x =percentage_hispanic ), color = "red", fill = "red", alpha = 0.25) +
-   labs(x = "Percentage of Each Race (Tract)", y = "Income", title = "Average Income per Population Percentage Based on Race", caption = "Orange = white | Purple = Black | Turquoise = Asian | Blue = Native | Red = Hispanic") 
+   labs(x = "Percentage of Each Race (Tract)", y = "Income (dollars)", title = "Tract Income across Racial Lines", caption = "Orange = white | Purple = Black | Turquoise = Asian | Blue = Native | Red = Hispanic") 
 cali_plot 
 ```
 
