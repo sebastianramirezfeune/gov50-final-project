@@ -18,22 +18,24 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-Despite its diverse population, California continues to be a center for significant social and economic inequality. Why is this so? It is common to look back to a history of oppression and discrimination that created institutions that continue to play integral roles in American society. This study aims to closely examine the relationship between race and income. How is income level generally related to race? And, what are some factors that may be impacting these income disparities? Thus, in addition to observing how income generally correlates with race, I will be simultaneously tracking how race is correlated with education level and unemployment. 
+Despite its diverse population, California continues to be a center for significant social and economic inequality. Why is this so? It is common to look back to a history of oppression and discrimination that created institutions that continue to play integral roles in American society. This study aims to closely examine the relationship between race and income. How is income level generally related to race? And, what are some factors that may be impacting these income disparities? Thus, in addition to observing how income generally correlates with race, I will be simultaneously tracking how income is correlated with education level and unemployment. 
 
-I contend that there were will be strong correlations made between income and racial identity in California, much like the rest of the United States. Black, Native American, and Hispanic/Latino communities will likely be in the lower ranks of income level, along with education and employment levels. This is largely due to historic discrimination of these two communities resulting in institutional biases and racism barring these demographics from many resources available to their Asian and white counterparts. While Asian Americans are people of color and recipients of institutionalized racism, their designation as “model minorities” and general arrival to the United States with high levels of education has aided in their ascension into higher income brackets. This is generally interesting because it gives concrete evidence and examples as to how the overall lack of access to resources has a strong link with the income inequality that we see in our nation.
+I contend that there were will be strong correlations made between income and racial identity in California, much like the rest of the United States. Black, Native American, and Hispanic/Latino communities will likely be in the lower ranks of income level. I believe that this is largely due to historic discrimination of these two communities, resulting in institutional biases and racism barring marginalized demographics from many resources available to their Asian and white counterparts. This is interesting because it gives concrete evidence and examples as to how the overall lack of access to resources has a strong link with the income inequality that we see in our nation.
 
 
 ## Data 
 
-In this cross-sectional study, we are using two sources: 
+In this cross-sectional study, I used two sources: 
 
-1. The American Community Survey (ACS) of 2020 was used to attain  data on income, education, and unemployment
+1. The American Community Survey (ACS) of 2020 to attain data on income, education, and unemployment
 
-2. The Decennial Census of 2020 was used to attain data on racial identity
+2. The Decennial Census of 2020 to attain data on racial identity
 
-Both sources were merged together into the same data set.
+Both sources were merged together into the same data set. 
 
-I used four variables: race, income, education, and unemployment. The state that we will be specifically observing is California, narrowing the scope of the study. The key independent variable is race: Black, white, Hispanic, Asian, and Native American. Using these variables, we are able to measure the dependent variables, which include income, education, and unemployment. 
+I used four variables: race, income, education, and unemployment. The key independent variable is the racial proportion of each tract. The races/ethnicities observed are Black, white, Hispanic, Asian, and Native American. Despite being ethnicities, the terms Hispanic and Latino will be used within the context of race in this study simply due to the status of Hispanic/Latino communities as racialized peoples in the United States context. The state that we will be specifically observing is California. Using these variables, we are able to measure the dependent variable, income. 
+
+Two additional predictor variables that we will be measuring are the unemployment (percentage of unemployed Californians in a tract) and education (percentage of Californians with a Bachelor's Degree in the tract). These will also be measured along with the dependent variable of income.
 
 ```{r}
 
@@ -151,13 +153,12 @@ cali_race |>
   facet_wrap(~variable, ncol = 2)
 ```
 
-
-Above are three visuals of the primary dependent and independent variables: race and income. The first two maps illustrate the distribution of incomes throughout the state of California. While the study observes income distribution based on census tracts, one map shows distribution across counties as a simpler version of the census tract-based model. These models reveal how wealth tends to be concentrated in coastal regions, more specifically the San Francisco Bay Area.
+Above are three visuals of the primary dependent and independent variables: racial/ethnic identity and income. The first two maps illustrate the distribution of incomes throughout the state of California. While the study observes income distribution based on census tracts, one map shows distribution across counties as a simpler version of the census tract-based model. These models reveal how wealth tends to be concentrated in coastal regions, more specifically the San Francisco Bay Area.
 
 The third map shows California's racial makeup throughout California counties (for simplicity sake). The race map shows the average racial makeup of each California tract/county, with Hispanic Californians spanning across California, especially near the coast, Southern California, and Central Valley. The second most prominent ethnic/racial group is white, with predominantly white tracts concentrating in more Eastern and Northern areas of the state. Asian Americans tend to be found near Los Angeles and the San Francisco Bay Area. Finally, the Black and Native Americans are relatively small throughout the state.
 
 ## Results
-The following section presents the multivariate regression table and model of the data along with their interpretations.
+The following section presents the models and regressions of the survey data.
 
 ### Multiple Regression
 
@@ -188,6 +189,8 @@ The Black regression model indicates that, with explanatory variables of Bachelo
 
 In contrast, the general demographics of white and Asian Californians show increases in tract income with increases in their share of the tract's population. The white regression model indicates that, with explanatory variables of Bachelor's Degrees and unemployment held constant, for every single percentage increase in the white population of a California tract, the income of the California tract should increase by about \$111.491. The Asian regression model indicates that, with explanatory variables of Bachelor's Degrees and unemployment held constant, for every single percentage increase in the Asian population of a California tract, the income of the California tract should increase by about \$396.996.
 
+Finally, with each racial demographic and unemployment held constant, the regression table indicates that a singular increase in the percentage with a Bachelor's Degree will prompt an increase in income that ranges between \$1979.034 and \$2537.698. This means that a tract with more owners of a Bachelor's Degree is likely to be more affluent. Observing the predictor variable of unemployment, with each racial demographic and Bachelor's Degree possession held constant, the regression table shows that a singular increase in the percentage of the tract's unemployed population result in a decrease in income that ranges between \$2528.774 and \$3223.207. This data implies that a greater presence of unemployed individuals in a census tract is indicative of a lower tract income level.
+
 It is important to note that the regression table is staggered in structure. This is in order to reduce interactions between the racial demographic questions. Since these racial groups add to 100%, changing the value of one explanatory variable would necessarily change the outcomes of others. Therefore, in order to avoid this phenomenon, a staggered approach was applied that, when analyzing a specific racial demographic, only holds the Percentage Bachelor's and Percentage Unemployed constant.
 
 ### Plot Summary
@@ -199,7 +202,7 @@ cali_plot <- ggplot(cali_merge, aes(y = Total)) +
   geom_smooth(method = "lm",aes(x =percentage_asian ), color = "turquoise", fill = "turquoise", alpha = 0.25) + 
   geom_smooth(method = "lm",aes(x = percentage_native), color = "blue", fill = "blue", alpha = 0.25)+
  geom_smooth(method = "lm",aes(x =percentage_hispanic ), color = "red", fill = "red", alpha = 0.25) +
-   labs(x = "Percentage of Each Race (Tract)", y = "Income (in dollars)", title = "Tract Income across Racial Lines", caption = "Orange = white | Purple = Black | Turquoise = Asian | Blue = Native | Red = Hispanic") 
+   labs(x = "Percentage of Each Race (Tract)", y = "Tract Income (in dollars)", title = "Distribution of Tract Income across Racial Lines", caption = "Purple = Black | Orange = White | Red = Hispanic | Turquoise = Asian | Blue = Native") 
 cali_plot 
 ```
 
@@ -207,23 +210,33 @@ cali_plot
 
 The figure above demonstrates the general relationship between racial composition of a tract and the tract's income. This model generates different trends from the previous regression as it holds it reveals a multivariate relationship without incorporation of the Bachelor's Degree and Unemployment variables. 
 
-The model shows that Native Californians and white Californians tend to decrease the average incomes of their tracts. On the other hand, Asian, Black, and Hispanic communities all show general average income increases with the increase in their respective populations.
+The model shows that Native Californians and white Californians tend to decrease the average incomes of their tracts. On the other hand, Asian, Black, and Hispanic communities all show general average income increases with the increase in their respective populations. All lines have relatively small margins of error, except in the case of Native Americans. The high variation indicated by the Native American demographic is likely due to their survey population being smaller than that of the other racial demographics.
 
 ### Causality and Confounders
 
-The intentions of the assignment were not to find a causal relationship. There was no way of controlling for potential confounders. This study was purely descriptive, demonstrating the general relationships between race and income. Human beings are not born with a tacit ability to earn higher incomes than others because of race.
+The intentions of the assignment were not to find a causal relationship. Since there is no treatment or control, there is no way of controlling for potential confounders. This study was purely descriptive, demonstrating the general relationships and correlations between race and income. Human beings are not born with a tacit ability to earn higher incomes than others because of race.
 
 Factors that may impact access to wealth are largely environmental include some of the other observed variables, such as education and employment. Nonetheless, trends within these confounding fields are also affected by institutional issues of racial discrimination, which affect certain communities differently. Drawing from the regression, communities with greater access to a college education and employment are more likely to have higher incomes. Effects of institutional racism can be far reaching into distinct neighborhoods and communities, under-funding them and affecting their access to resources necessary for financial success. 
 
 ## Conclusion
 
-Our analysis has shown that race and income in California are both strongly correlated. When there is an increase in the population of Black, Hispanic, or Indigenous people in a Census tract, the average income level of the tract is expected to drop. Meanwhile, an increase in Asian and white Californians increase the average income. Race and income are inextricably tied, and they reflect a much broader American issue of racial discrimination. 
+Our analysis has shown that race and income in California are strongly correlated. When there is an increase in the population of Black, Hispanic, or Indigenous people in a Census tract, the average income level of the tract is expected to drop. Meanwhile, an increase in Asian and white Californians increase the average tract income. Race and income are inextricably tied, and they reflect a much broader American issue of racial discrimination. 
 
-While observing these results, I understood the importance of measuring other predictor variables, such as education level and unemployment levels of a certain tract. The positive correlation between income and attainment of a Bachelor's degree indicates how education level is a potential factor that may largely influence the dichotomies in income that the various racial groups face. With unemployment levels holding a negative relationship with income, it is clear that higher levels of unemployment in certain communities may effect significant income losses.
+While observing these results, I understood the importance of measuring other predictor variables, such as education level and unemployment levels in California tracts. The positive correlation between income and attainment of a Bachelor's degree indicates how education level is a potential factor that may largely influence the dichotomies in income that the various racial groups face. With unemployment levels holding a negative relationship with income, it is clear that higher levels of unemployment in certain communities may effect significant income losses.
 
-Examining these separate variables is essential because there is no inherent reason for which certain demographics trend towards lower affluence in a state like California. In addition to be racial/ethnic minorities, there are also institutional obstacles that many families of color face. Asian American families hold a peculiar spot within this demographic, for they do face institutional racism, but in a different manner, with many white Americans using Asian Americans as "model minorities." 
+Examining these separate variables is essential because there is no inherent reason for which certain demographics trend towards lower affluence in a state like California. In addition to being racial/ethnic minorities, there are also institutional obstacles that many families of color face. Asian American families hold a peculiar spot within this demographic, for they do face institutional racism, but in a different manner, with many white Americans using Asian Americans as "model minorities." 
 
 ### Potential Flaws
 
+This study is not perfect. One specific concern with this study is how well each population is represented. As previously noted, the Native American population in California is likely to be significantly smaller than all other racial demographics. This could be both due to smaller numbers in their population, as well as lack of participation in surveys by those with tribal affiliations and live in Indigenous Nations. Furthermore, a level of distrust between the US government and Indigenous communities likely disincentives Native Americans from partaking in Census Decennial and ACS surveys.
+
+Similarly, Hispanic Californians and Asian Californians, as the two largest migrant populations in California, may face complications in being incorporated in the Census, due to citizenship concerns. Undocumented immigrants, which compose large portions of these communities, are likely to be less swilling to engage with surveys documenting their information. Ultimately, this omission of undocumented immigrants removes a significant portion of the Californian economy from important studies that use Census data.
+
 ### Next Steps
+
+Moving forward, I advise studying the implications of this data within a controlled testing environment. It would be interesting to expand studies into the work environment, not only observing disparities in hiring practices, but also baseline and promotional salaries. Furthermore, I would prefer for the scope of the study to expand beyond a single state, and instead to observe regional differences across the United States.
+
+Additionally, there is more work that can be done with the variables of unemployment and college education that were observed in this study. In order to further understand how race is linked to income, I recommend that researchers study education and unemployment as outcome variables with the racial categories as predictor variables. By finding links between race and unemployment, as well as education, stronger claims can be made about the general disparities in resource allocation across different communities.
+
+The expansion of this research will not only more precisely display the relationships between race and resource allocation, but also the social inequities that permeate American society. By using statistics to demonstrate the symptoms of institutionalized injustices, efforts at social change will grow stronger.
 
