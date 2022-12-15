@@ -159,7 +159,7 @@ The third map shows California's racial makeup throughout California counties (f
 
 ## Results
 
-The following section presents a regression table and plot of the data.
+The following section presents a regression table and plot of the data, along with an interpretation of the models.
 
 ### Multiple Regression
 
