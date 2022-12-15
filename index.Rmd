@@ -29,7 +29,7 @@ In this cross-sectional study, we are using two sources:
 
 1. The American Community Survey (ACS) of 2020 was used to attain  data on income, education, and unemployment
 
-2. The Decennial Census of 2020 was used to attain data on 
+2. The Decennial Census of 2020 was used to attain data on racial identity
 
 Both sources were merged together into the same data set.
 
@@ -112,9 +112,9 @@ cali_merge <- cali_merge |>
 ```
 
 ```{r}
-plot(ca_income["income"], main = "Average Income by California Tract")
+plot(ca_income["income"], main = "Average Income (in dollars) by California Tract")
 
-plot(ca_income1["estimate"], main = "Average Income by California County")
+plot(ca_income1["estimate"], main = "Average Income (in dollars) by California County")
 ```
 ```{r}
 cali_race <- get_decennial(
@@ -146,7 +146,8 @@ cali_race |>
         axis.ticks.x=element_blank(), 
         axis.title.y=element_blank(),
         axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
+        axis.ticks.y=element_blank()) + 
+  labs(title = "Racial Distribution of California", fill = "Percent") + 
   facet_wrap(~variable, ncol = 2)
 ```
 
@@ -156,6 +157,9 @@ Above are three visuals of the primary dependent and independent variables: race
 The third map shows California's racial makeup throughout California counties (for simplicity sake). The race map shows the average racial makeup of each California tract/county, with Hispanic Californians spanning across California, especially near the coast, Southern California, and Central Valley. The second most prominent ethnic/racial group is white, with predominantly white tracts concentrating in more Eastern and Northern areas of the state. Asian Americans tend to be found near Los Angeles and the San Francisco Bay Area. Finally, the Black and Native Americans are relatively small throughout the state.
 
 ## Results
+The following section presents the multivariate regression table and model of the data along with their interpretations.
+
+### Multiple Regression
 
 ```{r, results = 'asis', echo = FALSE, eval=TRUE, warning = FALSE, message = FALSE}
 ##library(stargazer)
@@ -176,10 +180,17 @@ cm <- c("percentage_bachelor" = "Percentage Bachelor's", "percentage_unemployed"
 modelsummary(list("Tract Income 1" = m.lm_black, "Tract Income 2" =  m.lm_white, "Tract Income 3" =  m.lm_hisp, "Tract Income 4" =  m.lm_asian, "Tract Income 5" =  m.lm_native), coef_map = cm, stars = TRUE)
 ```
 
-This table illustrates the regressions of multiple variables in relation to income. All of the regression show strong correlations and significance, as indicated by the three asterisks adjacent to every value. This indicates that there is likely a causal link between the values. When it comes to income, the linear regressions reveal that with a single percentage increase of an Asian or white person in a tract will increase the average Asian and white incomes, respectively, more than those of the Black, Hispanic, and Native populations. Meanwhile, the average income of Hispanic, Black, and Native American (in order of increasing income loss) decreases with each additional single percentage increase in their respective populations.
+### Interpretation
 
-More specifically, for every single percentage increase in the white population, the income of the white population increases by \$675.437. For every single percentage increase in the Black population, the income of the Black population decreases by \$1242.166 For every single percentage increase in the Hispanic population, the income of the Hispanic population decreases by \$887.981. For every single percentage increase in the Asian population, the income of the Asian population increases by \$917.810. For every single percentage decrease in the Native population, the income of the Native population increases by \$3196.215. Then, when looking at Bachelor's Degrees, the table shows that for every single percent increase in the portion of residents holding a Bachelor's in the Census tract increases tract income by 273.868. Meanwhile, increasing the unemployment rate by 1% decreases average income by \$81.783.
+This table illustrates the regressions of multiple variables in relation to income. All of the regression coefficients show strong correlations and significance, as indicated by the three asterisks adjacent to every value. These three asterisks indicate a p-value less than 0.001, implying very strong significance. Hence, it can be stated that all coefficients in the table have high statistical significance. 
 
+The Black regression model indicates that, with explanatory variables of Bachelor's Degrees and unemployment held constant, for every single percentage increase in the Black population of a California tract, the income of the California tract is expected to decrease by about \$599.507. The Hispanic regression model indicates that, with explanatory variables of Bachelor's Degrees and unemployment held constant, for every single percentage increase in the Hispanic population of a California tract, the income of the California tract should decrease by about \$322.279. The final demographic to, according to the table, generally generate an average loss in income with an increase in its tract population in Native Americans. With explanatory variables of Bachelor's Degrees and unemployment held constant, for every single percentage increase in the Native population of a California tract, the income of a California tract is expected to decrease by about \$1466.654.
+
+In contrast, the general demographics of white and Asian Californians show increases in tract income with increases in their share of the tract's population. The white regression model indicates that, with explanatory variables of Bachelor's Degrees and unemployment held constant, for every single percentage increase in the white population of a California tract, the income of the California tract should increase by about \$111.491. The Asian regression model indicates that, with explanatory variables of Bachelor's Degrees and unemployment held constant, for every single percentage increase in the Asian population of a California tract, the income of the California tract should increase by about \$396.996.
+
+It is important to note that the regression table is staggered in structure. This is in order to reduce interactions between the racial demographic questions. Since these racial groups add to 100%, changing the value of one explanatory variable would necessarily change the outcomes of others. Therefore, in order to avoid this phenomenon, a staggered approach was applied that, when analyzing a specific racial demographic, only holds the Percentage Bachelor's and Percentage Unemployed constant.
+
+### Plot Summary
 
 ```{r}
 cali_plot <- ggplot(cali_merge, aes(y = Total)) + 
@@ -188,15 +199,21 @@ cali_plot <- ggplot(cali_merge, aes(y = Total)) +
   geom_smooth(method = "lm",aes(x =percentage_asian ), color = "turquoise", fill = "turquoise", alpha = 0.25) + 
   geom_smooth(method = "lm",aes(x = percentage_native), color = "blue", fill = "blue", alpha = 0.25)+
  geom_smooth(method = "lm",aes(x =percentage_hispanic ), color = "red", fill = "red", alpha = 0.25) +
-   labs(x = "Percentage of Each Race (Tract)", y = "Income (dollars)", title = "Tract Income across Racial Lines", caption = "Orange = white | Purple = Black | Turquoise = Asian | Blue = Native | Red = Hispanic") 
+   labs(x = "Percentage of Each Race (Tract)", y = "Income (in dollars)", title = "Tract Income across Racial Lines", caption = "Orange = white | Purple = Black | Turquoise = Asian | Blue = Native | Red = Hispanic") 
 cali_plot 
 ```
 
+### Interpretation
 
-This graph illustrates the average income levels for Asian, Black, White, Hispanic, and Native residents of California according to the 2020 Census. The graph shows interesting implications of both economic inequity and racial composition in the state of California. The graph indicates that both the Indigenous and Black populations are relatively low throughout California, with the Black population never exceeding 20% and the Indigenous population never exceeding 2% in any Census tract. 
+The figure above demonstrates the general relationship between racial composition of a tract and the tract's income. This model generates different trends from the previous regression as it holds it reveals a multivariate relationship without incorporation of the Bachelor's Degree and Unemployment variables. 
 
-The graph indicates that in low income regions where income is less than \$100,000 dollars, these areas tend to be predominantly Hispanic American, especially around the \$45,000 annual income mark. Asian, Black, and white Americans tend to be the same population proportion at an income of zero, but they begin to diverge from here forward. Consistently, tracts where Asian and white Californians are more of a majority correspond with increasingly higher wages. Hence, the more white and Asian an area is, the more likely those whites and Asians are going to be affluent. On the other hand, in places were Black and Hispanic Californians make more money, especially after \$150,000, they are likely to make up a smaller share of the population, at about 5% or less for Black Californians and about 15% or less for Latino Californians.
+The model shows that Native Californians and white Californians tend to decrease the average incomes of their tracts. On the other hand, Asian, Black, and Hispanic communities all show general average income increases with the increase in their respective populations.
 
+### Causality and Confounders
+
+The intentions of the assignment were not to find a causal relationship. There was no way of controlling for potential confounders. This study was purely descriptive, demonstrating the general relationships between race and income. Human beings are not born with a tacit ability to earn higher incomes than others because of race.
+
+Factors that may impact access to wealth are largely environmental include some of the other observed variables, such as education and employment. Nonetheless, trends within these confounding fields are also affected by institutional issues of racial discrimination, which affect certain communities differently. Drawing from the regression, communities with greater access to a college education and employment are more likely to have higher incomes. Effects of institutional racism can be far reaching into distinct neighborhoods and communities, under-funding them and affecting their access to resources necessary for financial success. 
 
 ## Conclusion
 
@@ -206,8 +223,7 @@ While observing these results, I understood the importance of measuring other pr
 
 Examining these separate variables is essential because there is no inherent reason for which certain demographics trend towards lower affluence in a state like California. In addition to be racial/ethnic minorities, there are also institutional obstacles that many families of color face. Asian American families hold a peculiar spot within this demographic, for they do face institutional racism, but in a different manner, with many white Americans using Asian Americans as "model minorities." 
 
-My intention with creating an appendix was to dive deeper into the relationship between race and both education and unemployment. While my main analysis observes income as the outcome variable, this appendixed analysis uses both education and unemployment as outcome variables. 
+### Potential Flaws
 
-
-
+### Next Steps
 
